@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>七夕の願いごとメーカー</title>
+  <style>
+    /* ===== 共通スタイル（PC・スマホ共通） ===== */
+  
+  /* ページ全体のスタイル設定 */
+  body {
+    background-size: cover; /* 背景画像を画面いっぱいに広げる */
+    text-align: center;     /* 中央揃え */
+    padding: 30px;          /* 内側の余白 */
+    min-height: 100vh;      /* 最低でも画面の高さ分を確保 */
+    color: #004d40;         /* 文字の色（深緑） */
+    font-family: sans-serif; /* 読みやすいフォント */
+  /* 
+    background: url('bg.jpg') no-repeat center center;
+    background-size:contain; */
+  }
+  
+  /* タイトル（h1）の見た目 */
+  h1 {
+    font-size: 2em;         /* 大きな文字 */
+    margin-bottom: 20px;    /* 下に余白 */
+  }
+  
+  /* 入力欄とボタンの共通スタイル */
+  input,
+  button {
+    padding: 10px;          /* 内側の余白 */
+    font-size: 16px;        /* 文字サイズ */
+    margin: 5px;            /* 外側の余白 */
+    border: 1px solid #ccc; /* 薄いグレーの枠線 */
+    border-radius: 5px;     /* 少し角を丸く */
+  }
+  
+  /* 笹の木を表示するエリア */
+  #tree {
+    margin: 30px auto 0;                 /* 上に余白、左右中央に配置 */
+    width: 90%;                          /* 画面の90%の幅 */
+    max-width: 800px;                    /* 最大幅800pxまで */
+    height: 500px;                       /* 高さ固定 */
+    position: relative;                 /* 中にある短冊を自由に配置するために必要 */
+    border: 2px dashed #00695c;          /* 緑色の点線の枠 */
+    border-radius: 12px;                 /* 枠の角を丸める */
+    background-color: rgba(255, 255, 255, 0.6); /* 背景を白の半透明にして見やすく */
+    backdrop-filter: blur(4px);          /* 背景をぼかして視認性をアップ（対応ブラウザのみ） */
+    background: url('3521.png') no-repeat center top fixed; /* 背景画像を中央上部に固定で表示 */
+    background-size: cover;              /* 画像を全体に広げる */
+  }
+  
+  /* 願い事の短冊スタイル */
+  .wish {
+    background-color: pink; /* JSで上書きされる基本色 */
+    border: 2px solid #f48fb1; /* 枠線 */
+    border-radius: 4px; /* 角を少し丸める */
+    padding: 10px 8px; /* 上下に余裕を持たせる */
+    margin: 5px;
+    width: 50px; /* 幅を細めに */
+    height: 160px; /* 高さを長めにして縦長に */
+    position: absolute;
+    animation: sway 2s infinite ease-in-out;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2); /* 影を強めに */
+    font-size: 14px;
+    line-height: 1.4;
+    writing-mode: vertical-rl; /* 縦書き風にする（縦書き対応環境で） */
+    text-align: center;
+  
+    /* グラデーションで質感を追加 */
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+  }
+  
+  /* 短冊の穴を再現（擬似要素） */
+  .wish::before {
+    content: "";
+    display: block;
+    width: 12px;
+    height: 12px;
+    background-color: white;
+    border: 1px solid #888;
+    border-radius: 50%;
+    margin: 0 auto 6px auto;
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+  }
+  
+  
+  /* 短冊をゆらゆら揺らすアニメーション */
+  @keyframes sway {
+    0% {
+      transform: rotate(-3deg);         /* 左に3度傾ける */
+    }
+    50% {
+      transform: rotate(3deg);          /* 右に3度傾ける */
+    }
+    100% {
+      transform: rotate(-3deg);         /* また左に戻る */
+    }
+  }
+  
+  /* ===== スマホ対応のスタイル（幅が600px以下のとき適用） ===== */
+  @media screen and (max-width: 600px) {
+    /* タイトルを少し小さく */
+    h1 {
+      font-size: 1.5em;
+    }
+  
+    /* 入力欄やボタンを幅広にし、指で押しやすく */
+    input,
+    button {
+      width: 90%;        /* 横幅を画面の9割に */
+      font-size: 14px;   /* 文字も少し小さめに */
+    }
+  
+    /* 笹のエリアも高さを少し低く */
+    #tree {
+      height: 400px;           /* 高さをややコンパクトに */
+      background-position: center top;
+      background-size: contain; /* 背景画像がはみ出ないように縮小 */
+    }
+  
+    /* 短冊のサイズや文字も少し小さく */
+    .wish {
+      width: 100px;           /* 幅をやや小さめに */
+      font-size: 12px;        /* 文字も小さめにして見やすく */
+    }
+  }
+  #counter {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  
+  
+    </style>
+</head>
+<body>
+
+  <h1>🎋 七夕の願いごとメーカー</h1>
+  <input type="text" id="wishInput" placeholder="願いごとを入力">
+  <button id="addWishBtn">短冊に書いてお願いする</button>
+  <p id="counter">短冊の数: 0枚</p>
+  <div id="tree"></div>
+
+  <script>
+    // 禁止ワードリスト
+    const ngWords = ["死", "殺", "バカ", "アホ", "呪", "破壊", "テロ"];
+
+    // 初期化：保存された短冊を復元
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedWishes = JSON.parse(localStorage.getItem("wishes") || "[]");
+      savedWishes.forEach(wish => createWishTag(wish, false)); // false: タイマーで消さない
+      updateCounter(savedWishes.length);
+    });
+
+    // ボタンのイベント
+    document.getElementById("addWishBtn").addEventListener("click", () => {
+      const input = document.getElementById("wishInput");
+      const wishText = input.value.trim();
+      if (!wishText) return;
+
+      const isNG = ngWords.some(word => wishText.includes(word));
+      if (isNG) {
+        alert("その内容は登録できません。言葉を見直してください。");
+        return;
+      }
+
+      createWishTag(wishText, true); // true: 10秒後に消える
+      saveWish(wishText);            // localStorageに保存
+      updateCounter();               // カウンター更新
+      input.value = "";
+    });
+
+    // 短冊を作る関数
+    function createWishTag(text, autoRemove) {
+      const wishTag = document.createElement("div");
+      wishTag.className = "wish";
+      wishTag.textContent = text;
+
+      const tree = document.getElementById("tree");
+      const treeWidth = tree.offsetWidth;
+      const treeHeight = tree.offsetHeight;
+      const x = Math.random() * (treeWidth - 130);
+      const y = Math.random() * (treeHeight - 50);
+      wishTag.style.left = `${x}px`;
+      wishTag.style.top = `${y}px`;
+
+      const colors = ['#f4ffb1', '#ffdf4f', '#afd581', '#8fd4fa', '#fe93d8'];
+      wishTag.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+      tree.appendChild(wishTag);
+
+      // 削除処理（クリック時）
+      wishTag.addEventListener("click", () => {
+        tree.removeChild(wishTag);
+        removeWish(text);
+        updateCounter();
+      });
+
+      // 自動削除（10秒後）
+      if (autoRemove) {
+        setTimeout(() => {
+          if (tree.contains(wishTag)) {
+            tree.removeChild(wishTag);
+            removeWish(text);
+            updateCounter();
+          }
+        }, 10000);
+      }
+    }
+
+    // 保存処理
+    function saveWish(text) {
+      const wishes = JSON.parse(localStorage.getItem("wishes") || "[]");
+      wishes.push(text);
+      localStorage.setItem("wishes", JSON.stringify(wishes));
+    }
+
+    // 削除処理
+    function removeWish(text) {
+      let wishes = JSON.parse(localStorage.getItem("wishes") || "[]");
+      wishes = wishes.filter(item => item !== text);
+      localStorage.setItem("wishes", JSON.stringify(wishes));
+    }
+
+    // カウンター更新
+    function updateCounter(count = null) {
+      if (count === null) {
+        const wishes = JSON.parse(localStorage.getItem("wishes") || "[]");
+        count = wishes.length;
+      }
+      document.getElementById("counter").textContent = `短冊の数: ${count}枚`;
+    }
+  </script>
+</body>
+</html>
